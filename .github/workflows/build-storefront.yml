@@ -2,10 +2,11 @@ name: Build and Push saleor-storefront (dev)
 
 on:
   push:
+    # dev 환경은 main 브랜치를 기준으로 배포 (필요 시 dev 브랜치로 변경 가능)
     branches: [main]
-    paths:
-      - "Dockerfile"
-      - ".github/workflows/**"
+    # 코드가 바뀌면 항상 빌드되도록 paths 필터 제거
+    # paths-ignore:
+    #   - "README.md"
 
 jobs:
   build-and-push:
@@ -16,17 +17,24 @@ jobs:
       ECR_REPOSITORY: saleor-3tier-dev-storefront
       IMAGE_BASE_URL: 069423016509.dkr.ecr.ap-northeast-3.amazonaws.com
 
+      # dev 전용 이미지 태그
+      IMAGE_TAG: dev-${{ github.sha }}
+      IMAGE_LATEST_TAG: dev-latest
+
       # ---- Saleor Storefront 빌드용 설정 ----
-      # 빌드 시 스키마 가져올 GraphQL 엔드포인트 (지금은 Saleor 데모 사용)
+      # TODO: ALB + API 도메인 완성되면 아래 SALEOR_API_URL을 교체
+      # 예: https://u3-api.msp-g1.click/graphql/
       SALEOR_API_URL: "https://demo.saleor.io/graphql/"
-      # 최종 스토어프론트 URL (지금은 임시, 나중에 ALB/도메인 완성되면 변경)
-      STOREFRONT_URL: "https://storefront.dev.example.com/"
+
+      # TODO: 실제 dev ALB 도메인으로 변경
+      STOREFRONT_URL: "https://u3-store.msp-g1.click/"
       DEFAULT_CHANNEL: "default-channel"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ⚠️ 현재는 AWS Access Key 기반. 나중에는 OIDC(role-to-assume)로 전환 권장.
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -44,8 +52,13 @@ jobs:
             --build-arg NEXT_PUBLIC_STOREFRONT_URL=${{ env.STOREFRONT_URL }} \
             --build-arg NEXT_PUBLIC_DEFAULT_CHANNEL=${{ env.DEFAULT_CHANNEL }} \
             --build-arg SKIP_BUILD_STATIC_GENERATION=true \
-            -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
+            -t $IMAGE_BASE_URL/$ECR_REPOSITORY:${IMAGE_TAG} .
+
+          # dev 환경에서 사용할 latest 태그 추가(= dev-latest)
+          docker tag $IMAGE_BASE_URL/$ECR_REPOSITORY:${IMAGE_TAG} \
+                     $IMAGE_BASE_URL/$ECR_REPOSITORY:${IMAGE_LATEST_TAG}
 
       - name: Push Docker image
         run: |
-          docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:latest
+          docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:${IMAGE_TAG}
+          docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:${IMAGE_LATEST_TAG}
