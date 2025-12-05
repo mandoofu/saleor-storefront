@@ -1,0 +1,41 @@
+name: Build and Push saleor-storefront (dev)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ap-northeast-3
+      ECR_REPOSITORY: saleor-3tier-dev-storefront
+      IMAGE_BASE_URL: 069423016509.dkr.ecr.ap-northeast-3.amazonaws.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build image
+        run: docker build -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
+
+      - name: Push image
+        run: docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:latest
