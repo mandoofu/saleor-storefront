@@ -1,1 +1,1 @@
-FROM ghcr.io/saleor/react-storefront:latest
+FROM ghcr.io/saleor/react-storefront:3.15
