@@ -16,10 +16,12 @@ jobs:
       ECR_REPOSITORY: saleor-3tier-dev-storefront
       IMAGE_BASE_URL: 069423016509.dkr.ecr.ap-northeast-3.amazonaws.com
 
-      # ---- Saleor Storefront 빌드에 필요한 환경 ----
-      SALEOR_API_URL: "http://saleor-core.backend.svc.cluster.local:8000/graphql/"
-      STOREFRONT_URL: "https://storefront.dev.example.com/"      # 나중에 실제 도메인으로 수정
-      DEFAULT_CHANNEL: "default-channel"                         # Saleor 채널 이름
+      # ---- Saleor Storefront 빌드용 설정 ----
+      # 빌드 시 스키마 가져올 GraphQL 엔드포인트 (지금은 Saleor 데모 사용)
+      SALEOR_API_URL: "https://demo.saleor.io/graphql/"
+      # 최종 스토어프론트 URL (지금은 임시, 나중에 ALB/도메인 완성되면 변경)
+      STOREFRONT_URL: "https://storefront.dev.example.com/"
+      DEFAULT_CHANNEL: "default-channel"
 
     steps:
       - name: Checkout
