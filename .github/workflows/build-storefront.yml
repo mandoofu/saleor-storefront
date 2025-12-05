@@ -3,15 +3,7 @@ name: Build and Push saleor-storefront (dev)
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'Dockerfile'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'yarn.lock'
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.ts'
-      - '**/*.tsx'
+  workflow_dispatch:
 
 jobs:
   build-and-push:
