@@ -9,7 +9,7 @@
 		"build": "next build",
 		"start": "next start",
 		"predev": "pnpm run generate",
-		"prebuild": "pnpm run generate",
+  		"prebuild": "if [ \"$SKIP_CODEGEN\" != \"1\" ]; then pnpm run generate; else echo \"Skipping GraphQL codegen\"; fi",
 		"lint": "next lint --dir src --fix",
 		"generate": "graphql-codegen --config .graphqlrc.ts",
 		"prepare": "husky install"

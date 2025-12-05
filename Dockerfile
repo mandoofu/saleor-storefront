@@ -38,6 +38,9 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
+# CI / Docker 빌드에서는 코드젠 스킵
+ENV SKIP_CODEGEN=1
+
 RUN pnpm build
 
 # Production image, copy all the files and run next
