@@ -16,6 +16,11 @@ jobs:
       ECR_REPOSITORY: saleor-3tier-dev-storefront
       IMAGE_BASE_URL: 069423016509.dkr.ecr.ap-northeast-3.amazonaws.com
 
+      # ---- Saleor Storefront 빌드에 필요한 환경 ----
+      SALEOR_API_URL: "http://saleor-core.backend.svc.cluster.local:8000/graphql/"
+      STOREFRONT_URL: "https://storefront.dev.example.com/"      # 나중에 실제 도메인으로 수정
+      DEFAULT_CHANNEL: "default-channel"                         # Saleor 채널 이름
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,7 +37,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
+          docker build \
+            --build-arg NEXT_PUBLIC_SALEOR_API_URL=${{ env.SALEOR_API_URL }} \
+            --build-arg NEXT_PUBLIC_STOREFRONT_URL=${{ env.STOREFRONT_URL }} \
+            --build-arg NEXT_PUBLIC_DEFAULT_CHANNEL=${{ env.DEFAULT_CHANNEL }} \
+            -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
 
       - name: Push Docker image
         run: |
