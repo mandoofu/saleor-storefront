@@ -61,14 +61,31 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams({ params }: { params: { channel: string } }) {
-	const { products } = await executeGraphQL(ProductListDocument, {
-		revalidate: 60,
-		variables: { first: 20, channel: params.channel },
-		withAuth: false,
-	});
+	// CI / Docker 빌드 시에는 백엔드(API)가 아직 없을 수 있으니까
+	// 환경변수로 SSG를 아예 스킵한다.
+	if (process.env.SKIP_BUILD_STATIC_GENERATION === "true") {
+		console.log("[build] SKIP_BUILD_STATIC_GENERATION=true → products generateStaticParams skipped");
+		return [];
+	}
 
-	const paths = products?.edges.map(({ node: { slug } }) => ({ slug })) || [];
-	return paths;
+	try {
+		const { products } = await executeGraphQL(ProductListDocument, {
+			revalidate: 60,
+			variables: { first: 20, channel: params.channel },
+			withAuth: false,
+		});
+
+		const paths =
+			products?.edges.map(({ node: { slug } }) => ({
+				slug,
+			})) || [];
+
+		return paths;
+	} catch (error) {
+		// 빌드가 여기서 터지면 안 되니까 안전하게 비워서 리턴
+		console.error("[build] generateStaticParams for products failed, returning empty params", error);
+		return [];
+	}
 }
 
 const parser = edjsHTML();

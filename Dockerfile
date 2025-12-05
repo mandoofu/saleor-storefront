@@ -34,6 +34,10 @@ RUN corepack enable
 # 중요: Docker 빌드에서 codegen 돌리지 마라
 ENV SKIP_CODEGEN=1
 
+# 빌드 시에는 정적 파라미터 생성(generateStaticParams) 강제 비활성화
+ARG SKIP_BUILD_STATIC_GENERATION=true
+ENV SKIP_BUILD_STATIC_GENERATION=${SKIP_BUILD_STATIC_GENERATION}
+
 RUN pnpm build
 
 FROM base AS runner

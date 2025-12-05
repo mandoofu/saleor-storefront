@@ -2,10 +2,10 @@ name: Build and Push saleor-storefront (dev)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'Dockerfile'
-      - '.github/workflows/**'
+      - "Dockerfile"
+      - ".github/workflows/**"
 
 jobs:
   build-and-push:
@@ -43,6 +43,7 @@ jobs:
             --build-arg NEXT_PUBLIC_SALEOR_API_URL=${{ env.SALEOR_API_URL }} \
             --build-arg NEXT_PUBLIC_STOREFRONT_URL=${{ env.STOREFRONT_URL }} \
             --build-arg NEXT_PUBLIC_DEFAULT_CHANNEL=${{ env.DEFAULT_CHANNEL }} \
+            --build-arg SKIP_BUILD_STATIC_GENERATION=true \
             -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
 
       - name: Push Docker image
