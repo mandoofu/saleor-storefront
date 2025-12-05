@@ -3,6 +3,15 @@ name: Build and Push saleor-storefront (dev)
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
 
 jobs:
   build-and-push:
@@ -27,8 +36,10 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build image
-        run: docker build -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_BASE_URL/$ECR_REPOSITORY:latest .
 
-      - name: Push image
-        run: docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:latest
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_BASE_URL/$ECR_REPOSITORY:latest
